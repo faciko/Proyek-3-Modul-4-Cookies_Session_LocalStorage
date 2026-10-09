@@ -14,4 +14,10 @@ class Product extends Model
     protected $fillable = [
         'id_barang', 'nama_barang', 'deskripsi', 'harga', 'stok', 'gambar'
     ];
+
+    public function orderDetails()
+    {
+        return $this->hasMany(OrderDetail::class, 'id_barang', 'id_barang');
+    }
 }
+

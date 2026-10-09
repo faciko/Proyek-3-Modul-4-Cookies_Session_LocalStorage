@@ -5,10 +5,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 
-// 1. Halaman Utama / Katalog Produk (Bisa diakses publik / tanpa login)
 Route::get('/', [ShopController::class, 'index'])->name('shop.index');
 
-// 2. Auth Routes (Login/Logout)
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
@@ -16,7 +14,6 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
-// 3. Fitur yang Wajib Login (Keranjang, Checkout, & Riwayat Pesanan)
 Route::middleware('auth')->group(function () {
     Route::post('/cart/add/{id}', [ShopController::class, 'addToCart'])->name('cart.add');
     Route::get('/cart', [ShopController::class, 'cart'])->name('shop.cart');

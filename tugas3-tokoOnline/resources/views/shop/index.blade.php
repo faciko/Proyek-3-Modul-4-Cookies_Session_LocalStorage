@@ -18,6 +18,8 @@
         .alert { padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; }
         .alert-success { background: #d4edda; color: #155724; }
         .alert-error { background: #f8d7da; color: #721c24; }
+        .badge-out { background: #dc3545; color: white; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .product-card.out-of-stock { border-color: #f5c2c7; background: #fffcfc; }
     </style>
 </head>
 <body>
@@ -34,7 +36,7 @@
                 </form>
             @else
                 <span style="color: gray;">Tamu (Belum Login)</span>
-                <a href="{{ route('login') }}" style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px;">Login untuk Belanja</a>
+                <a href="{{ route('login') }}" style="background: #007bff; color: white; padding: 6px 12px; border-radius: 4px; font-weight: bold;">Login untuk Belanja</a>
             @endauth
         </div>
     </div>
@@ -49,27 +51,43 @@
     <h3>Daftar Barang Tersedia</h3>
     <div class="grid">
         @foreach ($products as $p)
-            <div class="product-card">
+            <div class="product-card {{ $p->stok <= 0 ? 'out-of-stock' : '' }}">
                 <div>
-                    <div class="img-placeholder">[Gambar: {{ $p->gambar ?? 'produk.jpg' }}]</div>
+                    <div class="img-placeholder" style="position: relative;">
+                        [Gambar: {{ $p->gambar ?? 'produk.jpg' }}]
+                        @if ($p->stok <= 0)
+                            <div style="position: absolute; top: 8px; right: 8px;">
+                                <span class="badge-out">HABIS</span>
+                            </div>
+                        @endif
+                    </div>
                     <strong style="font-size: 15px;">{{ $p->nama_barang }}</strong>
                     <div class="price">Rp {{ number_format($p->harga, 0, ',', '.') }}</div>
-                    <div class="stock">Stok: <strong>{{ $p->stok }}</strong></div>
+                    
+                    <div class="stock">
+                        @if ($p->stok > 0)
+                            Stok: <strong>{{ $p->stok }}</strong>
+                        @else
+                            <span style="color: #dc3545; font-weight: bold;">Stok: 0 (Habis)</span>
+                            <span class="badge-out" style="margin-left: 5px;">Stok Habis</span>
+                        @endif
+                    </div>
                     <p style="font-size: 12px; color: #666; margin: 6px 0;">{{ $p->deskripsi }}</p>
                 </div>
 
-                @auth
-                    @if ($p->stok > 0)
+                @if ($p->stok <= 0)
+                    {{-- Barang stok 0 tidak dapat dibeli oleh siapapun (login maupun belum login) --}}
+                    <button class="btn-disabled" disabled title="Barang tidak dapat dibeli karena stok habis">Stok Habis (Tidak Dapat Dibeli)</button>
+                @else
+                    @auth
                         <form action="{{ route('cart.add', $p->id_barang) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn-add">+ Masukkan ke Keranjang</button>
                         </form>
                     @else
-                        <button class="btn-disabled" disabled>Stok Habis</button>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}" style="display: block; text-align: center; text-decoration: none; background: #ffc107; color: #212529; padding: 8px 12px; border-radius: 4px; margin-top: 10px; font-size: 13px;">Login untuk Membeli</a>
-                @endauth
+                        <a href="{{ route('login') }}" style="display: block; text-align: center; text-decoration: none; background: #ffc107; color: #212529; padding: 8px 12px; border-radius: 4px; margin-top: 10px; font-size: 13px; font-weight: bold;">Login untuk Membeli</a>
+                    @endauth
+                @endif
             </div>
         @endforeach
     </div>

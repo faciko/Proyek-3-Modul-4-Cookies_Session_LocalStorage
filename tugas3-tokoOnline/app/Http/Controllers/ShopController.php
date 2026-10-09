@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
-    // 1. Katalog Produk (Bisa diakses publik / tanpa login)
     public function index()
     {
         $products = Product::all();
@@ -17,7 +16,6 @@ class ShopController extends Controller
         return view('shop.index', compact('products', 'totalItems'));
     }
 
-    // 2. Tambah ke Keranjang (Wajib Auth)
     public function addToCart(Request $request, $id)
     {
         $product = Product::findOrFail($id);
@@ -29,7 +27,6 @@ class ShopController extends Controller
         $cart = session()->get('cart', []);
         $currentQty = $cart[$id] ?? 0;
 
-        // Validasi: tidak boleh melebihi stok
         if ($currentQty + 1 > $product->stok) {
             return back()->with('error', 'Jumlah melebihi stok yang tersedia!');
         }
@@ -40,7 +37,6 @@ class ShopController extends Controller
         return back()->with('success', 'Barang berhasil dimasukkan ke keranjang.');
     }
 
-    // 3. Halaman Keranjang Belanja (Wajib Auth)
     public function cart()
     {
         $cart = session()->get('cart', []);
@@ -72,7 +68,6 @@ class ShopController extends Controller
         return view('shop.cart', compact('items', 'total'));
     }
 
-    // 4. Ubah Kuantitas (+ atau -) (Wajib Auth)
     public function updateCart(Request $request, $id, $action)
     {
         $product = Product::findOrFail($id);
@@ -96,7 +91,6 @@ class ShopController extends Controller
         return back();
     }
 
-    // 5. Hapus 1 Item dari Keranjang (Wajib Auth)
     public function removeFromCart($id)
     {
         $cart = session()->get('cart', []);
@@ -106,7 +100,6 @@ class ShopController extends Controller
         return back()->with('success', 'Barang dihapus dari keranjang.');
     }
 
-    // 6. Kosongkan Keranjang (Wajib Auth)
     public function clearCart()
     {
         session()->forget('cart');
